@@ -5,5 +5,5 @@ const app = express();
 app.use(express.static('dist/client/'))
 app.use(ssrHandler);
 
-console.log("Web server started listening On http://0.0.0.0:80")
+console.log("Web server started listening on http://0.0.0.0:80")
 app.listen(80);
