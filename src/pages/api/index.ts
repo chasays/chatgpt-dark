@@ -101,7 +101,7 @@ export const post: APIRoute = async context => {
         return new Response("不存在对应密码，请联系网站管理员。")
       }
       if (pwdList[password] >= 100) {
-        return new Response("请求次数已达到100次限制，请明日再试。")
+        return new Response("回复次数已达到100次限制，请明日再试。")
       }
     }
 
