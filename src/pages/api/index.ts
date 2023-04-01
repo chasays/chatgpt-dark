@@ -59,7 +59,7 @@ if (pwdFile) {
     startTimer()
 
     setInterval(() => {
-      fs.writeFile(pwdFile, JSON.stringify(pwdList).replace(",", ",\n"), (err) => {
+      fs.writeFile(pwdFile, JSON.stringify(pwdList).replace(/,/g, ",\n"), (err) => {
         if (err) {
           console.log("password status file save failed")
         }
