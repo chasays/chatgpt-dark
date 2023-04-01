@@ -5,13 +5,14 @@ import {
   ReconnectInterval
 } from "eventsource-parser"
 import type { ChatMessage } from "~/types"
-import GPT3Tokenizer from 'gpt3-tokenizer'
 import { getAll } from "@vercel/edge-config"
 import { splitKeys, randomWithWeight, randomKey } from "~/utils"
-import fetch from 'node-fetch'
 import { SocksProxyAgent } from "socks-proxy-agent"
+import GPT3Tokenizer from 'gpt3-tokenizer'
+import fetch from 'node-fetch'
+import fs from "fs";
 
-const tokenizer = new GPT3Tokenizer.default({ type: 'gpt3' }) //如果这里报错是因为你node版本和我不一样 这句话改成 const tokenizer = new GPT3Tokenizer({ type: 'gpt3' })
+const tokenizer = new GPT3Tokenizer.default({ type: 'gpt3' }) //如果这里报错 就把这句话改成 const tokenizer = new GPT3Tokenizer({ type: 'gpt3' })
 
 export const localKey =
   import.meta.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY || ""
@@ -28,7 +29,46 @@ const maxTokens = Number(
   import.meta.env.MAX_INPUT_TOKENS || process.env.MAX_INPUT_TOKENS
 )
 
+const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
+
 const pwd = import.meta.env.PASSWORD || process.env.PASSWORD
+const pwdFile = import.meta.env.PASSWORD_FILE || process.env.PASSWORD_FILE
+const pwdList = {}
+
+if (pwdFile) {
+  fs.readFile(pwdFile, 'utf8', (err, data) => {
+    if (err) throw err;
+    
+    const list = JSON.parse(data);
+    
+    for (let key in list) {
+      pwdList[key] = list[key]
+    }
+
+    function startTimer() {
+      const now = new Date()
+      const msUntilMidnight = 24 * 60 * 60 * 1000 - now % (24 * 60 * 60 * 1000)
+      setTimeout(() => {
+        for (let key in pwdList) {
+          pwdList[key] = 0
+        }
+        startTimer()
+      }, msUntilMidnight)
+    }
+
+    startTimer()
+
+    setInterval(() => {
+      fs.writeFile(pwdFile, JSON.stringify(pwdList), (err) => {
+        if (err) {
+          console.log("password status file save failed")
+        }
+        console.log('password status file saved');
+      })
+    }, 300 * 1000)
+
+  })
+}
 
 export const post: APIRoute = async context => {
   try {
@@ -51,6 +91,18 @@ export const post: APIRoute = async context => {
 
     if (pwd && pwd !== password) {
       return new Response("密码错误，请联系网站管理员。")
+    }
+
+    if (pwdFile) {
+      if (!password) {
+        return new Response("请填写密码。")
+      }
+      if (pwdList[password] === undefined) {
+        return new Response("不存在对应密码，请联系网站管理员。")
+      }
+      if (pwdList[password] >= 100) {
+        return new Response("请求次数已达到100次限制，请明日再试。")
+      }
     }
 
     if (!messages?.length) {
@@ -76,58 +128,37 @@ export const post: APIRoute = async context => {
     const tokens = messages.reduce((acc, cur) => {
       const tokens = tokenizer.encode(cur.content).bpe.length
       return acc + tokens
-      // return 0
     }, 0)
 
     if (tokens > (Number.isInteger(maxTokens) ? maxTokens : 3072)) {
       if (messages.length > 1)
         return new Response(
-          `由于开启了连续对话选项，导致本次对话过长，超过了模型最大输入限制，请删除部分旧消息后重试，或者关闭连续对话选项。`
+          `由于开启了连续对话选项，导致本次对话过长，超过了GPT模型最大输入限制，请删除部分旧消息后重试，或者关闭连续对话选项。`
         )
-      else return new Response("消息太长了，超过了模型最大输入限制，缩短一点吧。")
+      else return new Response("消息太长了，超过了GPT模型最大输入限制，缩短一点吧。")
     }
 
     const encoder = new TextEncoder()
     const decoder = new TextDecoder()
     
-    const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
-    
-    var completion
-    
-    if (proxy && proxy?.length && proxy.length > 4) {
-      completion = await fetch(`https://${baseURL}/v1/chat/completions`, {
-        agent: new SocksProxyAgent(proxy),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localKey}`
-        },
-        method: "POST",
-        body: JSON.stringify({
-          model: model || "gpt-3.5-turbo",
-          messages,
-          temperature,
-          stop,
-          // max_tokens: 4096 - tokens,
-          stream: true
-        })
+    const completion = await fetch(`https://${baseURL}/v1/chat/completions`, {
+      agent: proxy ? new SocksProxyAgent(proxy) : undefined,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localKey}`
+      },
+      method: "POST",
+      body: JSON.stringify({
+        model: model || "gpt-3.5-turbo",
+        messages,
+        temperature,
+        stop,
+        // max_tokens: 4096 - tokens,
+        stream: true
       })
-    } else {
-      completion = await fetch(`https://${baseURL}/v1/chat/completions`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localKey}`
-        },
-        method: "POST",
-        body: JSON.stringify({
-          model: model || "gpt-3.5-turbo",
-          messages,
-          temperature,
-          stop,
-          // max_tokens: 4096 - tokens,
-          stream: true
-        })
-      })
-    }
+    })
+
+    var get = false
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -150,6 +181,10 @@ export const post: APIRoute = async context => {
         }
         const parser = createParser(streamParser)
         for await (const chunk of completion.body as any) {
+          if (!get) {
+            pwdList[password]++
+            get = true
+          }
           parser.feed(decoder.decode(chunk))
         }
       }
@@ -163,31 +198,17 @@ export const post: APIRoute = async context => {
 }
 
 export async function fetchBilling(key: string) {
-   const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
-    if (proxy && proxy?.length && proxy.length > 4) {
-      return (await fetch(`https://${baseURL}/dashboard/billing/credit_grants`, {
-        agent: new SocksProxyAgent(proxy),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`
-        }
-      }).then(res => res.json())) as {
-        total_granted: number
-        total_used: number
-        total_available: number
-      }
-    } else {
-      return (await fetch(`https://${baseURL}/dashboard/billing/credit_grants`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`
-        }
-      }).then(res => res.json())) as {
-        total_granted: number
-        total_used: number
-        total_available: number
-      }
+  return (await fetch(`https://${baseURL}/dashboard/billing/credit_grants`, {
+    agent: proxy ? new SocksProxyAgent(proxy) : undefined,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`
     }
+  }).then(res => res.json())) as {
+    total_granted: number
+    total_used: number
+    total_available: number
+  }
 }
 
 export async function genBillingsTable(keys: string[]) {
