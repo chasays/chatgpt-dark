@@ -9,10 +9,12 @@ export default function SettingAction(props: {
   setSetting: Setter<Setting>
   clear: any
   reAnswer: any
+  newSession: any
   messaages: ChatMessage[]
 }) {
   const [shown, setShown] = createSignal(false)
   const [copied, setCopied] = createSignal(false)
+  const [sessionShown, setSessionShown] = createSignal(false)
   return (
     <div class="text-sm text-slate-7 dark:text-slate mb-2">
       <Show when={shown()}>
@@ -76,7 +78,7 @@ export default function SettingAction(props: {
           <select
             name="models"
             id="pet-select"
-            class="max-w-150px w-full bg-slate bg-op-15 rounded-lg appearance-none accent-slate text-center"
+            class="max-w-150px w-full bg-slate bg-op-15 appearance-none accent-slate text-center"
             value={props.setting().model}
             onChange={e => {
               props.setSetting({
@@ -99,9 +101,11 @@ export default function SettingAction(props: {
               checked={props.setting().archiveSession}
               class="sr-only peer"
               onChange={e => {
+                let checked = (e.target as HTMLInputElement).checked
+                setSessionShown(checked)
                 props.setSetting({
                   ...props.setting(),
-                  archiveSession: (e.target as HTMLInputElement).checked
+                  archiveSession: checked
                 })
               }}
             />
@@ -137,6 +141,13 @@ export default function SettingAction(props: {
           label="设置"
         />
         <div class="flex">
+          <Show when={props.setting().archiveSession || sessionShown()}>
+            <ActionItem
+              onClick={props.newSession}
+              icon="i-carbon:add-comment"
+              label="新建对话"
+            />
+          </Show>
           <ActionItem
             onClick={scrollToTop}
             icon="i-carbon:arrow-up"

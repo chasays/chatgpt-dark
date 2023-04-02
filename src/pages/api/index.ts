@@ -46,7 +46,7 @@ if (pwdFile) {
     }
 
     function startTimer() {
-      const now = new Date()
+      const now = new Date();
       const msUntilMidnight = 24 * 60 * 60 * 1000 - now % (24 * 60 * 60 * 1000)
       setTimeout(() => {
         for (let key in pwdList) {
@@ -89,19 +89,19 @@ export const post: APIRoute = async context => {
       stop?: string
     }
 
-    if (pwd && pwd !== password) {
-      return new Response("密码错误，请联系网站管理员。")
-    }
-
     if (pwdFile) {
       if (!password) {
-        return new Response("请填写密码。")
+        return new Response("请在输入框左上角设置里填写密码。")
       }
       if (pwdList[password] === undefined) {
         return new Response("不存在对应密码，请联系网站管理员。")
       }
       if (pwdList[password] >= 100) {
         return new Response("回复次数已达到100次限制，请明日再试。")
+      }
+    } else {
+      if (pwd && pwd !== password) {
+        return new Response("密码错误，请联系网站管理员。")
       }
     }
 
