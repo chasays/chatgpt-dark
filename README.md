@@ -1,6 +1,6 @@
 # ChatGPT-Dark
-# 本项目基于 [chatgpt-vercel](https://github.com/ourongxing/chatgpt-vercel) 开发。
-##  增加了多密码模式和记录不同对话历史的功能
+> 本项目基于 [chatgpt-vercel](https://github.com/ourongxing/chatgpt-vercel) 开发。
+#  增加了多密码模式和记录不同对话历史的功能
 
 ![](assets/dark1.png)
 ![](assets/dark2.png)
