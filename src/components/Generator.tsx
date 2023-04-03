@@ -346,7 +346,7 @@ function allSession() {
         if (session.length > 1) {
           let detail = session.slice(1).reverse().reduce((acc, cur) => {
             if (acc.length < 300)
-              return cur.content.replaceAll("\n", "") .slice(0, 300 - acc.length) + " " + acc
+              return cur.content.replaceAll("\n", "").slice(0, 300 - acc.length) + " " + acc
             return acc
           }, "")
           sessions.push({
