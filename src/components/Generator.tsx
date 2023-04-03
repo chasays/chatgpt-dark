@@ -344,9 +344,10 @@ function allSession() {
         let id = parseInt(key.slice(8))
         let desc = session[0].content.slice(0, 40)
         if (session.length > 1) {
-          let detail = session.slice(1).reduce((acc, cur) => {
-            if (acc.length < 200)
-              return cur.content.slice(0, 200 - acc.length) + " " + acc
+          let detail = session.slice(1).reverse().reduce((acc, cur) => {
+            if (acc.length < 300)
+              return cur.content.replaceAll("\n", "") .slice(0, 300 - acc.length) + " " + acc
+            return acc
           }, "")
           sessions.push({
             id: id,
@@ -357,14 +358,13 @@ function allSession() {
           sessions.push({
             id: id,
             desc: "新对话",
-            detail: session[0].content.slice(0, 200)
+            detail: session[0].content.slice(0, 300)
           })
         }
       }
     }
   }
-  sessions.reverse()
-  return sessions
+  return sessions.reverse()
 }
 
 function newSession() {
