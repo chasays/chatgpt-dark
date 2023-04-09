@@ -24,11 +24,12 @@
 | ---------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------|
 | `OPENAI_API_KEY`                   | OpenAI API Key                                               | 无                                                          |
 | `DEFAULT_MESSAGE`                  | 默认提示信息                                                    | - 由 [OpenAI API (gpt-3.5-turbo)](https://platform.openai.com/docs/guides/chat) 提供支持。<br/>- 由 [@CODEisArt](https://github.com/CODEisArrrt) 基于 [chatgpt-vercel](https://github.com/ourongxing/chatgpt-vercel) 开发，查看 [源码](https://github.com/CODEisArrrt/chatgpt-dark)，欢迎自部署。<br/>- [[Shift]] + [[Enter]] 换行。只输入 [[/]] 可展开Prompt预设。只输入 [[空格]] 可选择切换到不同对话历史，点击输入框滚动到底部。<br/>- 为了节省GPT请求Token消耗，默认关闭了连续对话，若需要可在输入框左上角的设置里自行开启，也可开启记录对话内容，来新建和记录不同对话历史。|
-| `DEFAULT_SETTING`                  | 默认设置                                                     | {<br/>  "continuousDialogue": true,<br/>  "archiveSession": false,<br/>  "openaiAPIKey": "",<br />  "openaiAPITemperature": 60,<br/>  "systemRule": ""<br/>  "password": ""<br />} |
+| `DEFAULT_SETTING`                  | 默认设置 | {<br/>  "continuousDialogue": true,<br/>  "archiveSession": false,<br/>  "openaiAPIKey": "",<br />  "openaiAPITemperature": 60,<br/>  "systemRule": ""<br/>  "password": ""<br />} |
 | `RESET_CONTINUOUS_DIALOGUE_OPTION` | 刷新时重置 `开启连续对话` 选项，在分享给很多人用的时候可以有效避免大量消耗。 | false                                                        |
-| `OPENAI_API_BASE_URL`              | 本地开发时可以填写 OpenAI 的代理服务器，但是 Vercel 不需要。 | api.openai.com                                               |
-| `PASSWORD`                         | 网站密码                                                     | 无                                                           |
-| `PASSWORD_FILE`                    | 单人单密码JSON文件路径                                         | 无                                                           |
+| `OPENAI_API_BASE_URL`              | 本地开发时可以填写 OpenAI 的代理服务器，但是 Vercel 不需要。            | api.openai.com                                               |
+| `PASSWORD`                         | 网站密码                                                         | 无                                                           |
+| `PASSWORD_FILE`                    | 单人单密码JSON文件路径                                             | 无                                                           |
+| `MAX_REPLY_QUOTA`                  | 单人单密码文件设置后，单个密码每日最多可用GPT回复次数 | 100 |
 | `MAX_INPUT_TOKENS`                 | 输入的 token 最大值，如果开启 `连续对话`，将计算之前的所有对话内容。OpenAI 限制 token 最大值为 4096，但这是输入和输出之和，所以可以将这个值设置为 3072， 留 1024 作为输出。如果不想被滥用，可以将这个值设置的再小一点。 | 3072                                                         |
 
 

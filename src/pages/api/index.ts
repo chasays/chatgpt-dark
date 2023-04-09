@@ -29,6 +29,8 @@ const maxTokens = Number(
   import.meta.env.MAX_INPUT_TOKENS || process.env.MAX_INPUT_TOKENS
 )
 
+const replyQuota = Number(import.meta.env.MAX_REPLY_QUOTA || process.env.MAX_REPLY_QUOTA || 100)
+
 const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
 
 const pwd = import.meta.env.PASSWORD || process.env.PASSWORD
@@ -50,7 +52,9 @@ if (pwdFile) {
       const msUntilMidnight = 24 * 60 * 60 * 1000 - now % (24 * 60 * 60 * 1000)
       setTimeout(() => {
         for (let key in pwdList) {
-          pwdList[key] = 0
+          if (pwdList[key] != 0) {
+            pwdList[key] = 0
+          }
         }
         startTimer()
       }, msUntilMidnight)
@@ -61,9 +65,8 @@ if (pwdFile) {
     setInterval(() => {
       fs.writeFile(pwdFile, JSON.stringify(pwdList).replace(/,/g, ",\n"), (err) => {
         if (err) {
-          console.log("password status file save failed")
+          console.log("password status file save failed", err)
         }
-        console.log('password status file saved');
       })
     }, 300 * 1000)
 
@@ -96,8 +99,8 @@ export const post: APIRoute = async context => {
       if (pwdList[password] === undefined) {
         return new Response("不存在对应密码，请联系网站管理员。")
       }
-      if (pwdList[password] >= 100) {
-        return new Response("回复次数已达到100次限制，请明日再试。")
+      if (pwdList[password] >= replyQuota) {
+        return new Response("今日回复次数已达到上限：" + replyQuota + "次，请明日再试。")
       }
     } else {
       if (pwd && pwd !== password) {
