@@ -10,7 +10,7 @@
 
 0. `git clone https://github.com/CODEisArrrt/chatgpt-dark.git`
 1. 升级到 `node18` (我的版本是v18.15.0)
-2. 如果在内地部署 需要配置好环境变量 `SOCKS_PROXY` 我设置的是 `export SOCKS_PROXY=socks5://127.0.0.1:1080`因为内地需要通过代理访问API 内地有dns污染 hosts里要加 `52.152.96.252 api.openai.com` 这个是api官方域名的解析ip
+2. 如果在内地部署 需要配置好环境变量 `SOCKS_PROXY` 我设置的是 `export SOCKS_PROXY=socks5://127.0.0.1:1080`因为内地需要通过代理访问API 内地有dns污染 hosts里要加 `104.18.7.192 api.openai.com` 这个是api官方域名的解析ip
 3. `pnpm i` 安装依赖。
 4. `pnpm run build && node server.js` 打包和运行 然后使用`http://localhost:80` 就能访问了
 
