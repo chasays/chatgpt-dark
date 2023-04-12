@@ -32,6 +32,6 @@ export default defineConfig({
   }), solidJs()],
   output: "server",
   adapter: node({
-    mode: "standalone"
+    mode: "middleware"
   })
 });
