@@ -33,7 +33,6 @@ const replyQuota = Number(import.meta.env.MAX_REPLY_QUOTA || process.env.MAX_REP
 const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
 
 const pwd = import.meta.env.PASSWORD || process.env.PASSWORD
-console.error(baseURL);
 const pwdFile = import.meta.env.PASSWORD_FILE || process.env.PASSWORD_FILE
 const pwdList = {}
 
