@@ -24,7 +24,6 @@ export const baseURL = process.env.VERCEL
       process.env.OPENAI_API_BASE_URL ||
       "api.openai.com"
     ).replace(/^https?:\/\//, "")
-
 const maxTokens = Number(
   import.meta.env.MAX_INPUT_TOKENS || process.env.MAX_INPUT_TOKENS
 )
@@ -34,6 +33,7 @@ const replyQuota = Number(import.meta.env.MAX_REPLY_QUOTA || process.env.MAX_REP
 const proxy = import.meta.env.SOCKS_PROXY || process.env.SOCKS_PROXY
 
 const pwd = import.meta.env.PASSWORD || process.env.PASSWORD
+console.error(baseURL);
 const pwdFile = import.meta.env.PASSWORD_FILE || process.env.PASSWORD_FILE
 const pwdList = {}
 
